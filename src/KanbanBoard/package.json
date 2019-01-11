@@ -5,7 +5,7 @@
   "author": "Cássio Zen",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server --progress",
+    "start": "webpack-dev-server --progress --hot",
     "build": "NODE_ENV=production webpack -p --progress --colors"
   },
   "devDependencies": {
@@ -17,7 +17,12 @@
     "webpack-dev-server": "~1.14.*"
   },
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "marked": "^0.6.0",
+    "prop-types": "^15.6.2",
     "react": "^15.0.0",
-    "react-dom": "^15.0.0"
+    "react-addons-update": "^15.6.2",
+    "react-dom": "^15.0.0",
+    "whatwg-fetch": "^3.0.0"
   }
 }
