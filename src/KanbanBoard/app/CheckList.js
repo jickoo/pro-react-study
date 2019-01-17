@@ -1,4 +1,6 @@
-import React, {Component, PropTypes} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types'; // ES6
+
 
 class CheckList extends Component {
 	checkInputKeyPress(evt) {

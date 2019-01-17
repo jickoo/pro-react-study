@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 class EditCard extends Component {
     componentWillMount() {
-        let card = this.props.card.find((card) => card.id == this.props.params.card_id);
+        let card = this.props.cards.find((card) => card.id == this.props.params.card_id);
         this.setState(Object.assign({},card));
     }
 
@@ -15,11 +15,11 @@ class EditCard extends Component {
     handleSubmit(e) {
         e.preventDefault();
         this.props.cardCallbacks.updateCard(this.state);
-        this.props.history.pushState(null, '/');
+        this.props.router.push({pathname:'/'});
     }
 
     handleClose(e) {
-        this.props.history.pushState(null, '/');
+        this.props.router.push({pathname:'/'});
     }
 
     render() {
