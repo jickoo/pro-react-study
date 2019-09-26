@@ -5,11 +5,12 @@ import { throttle } from './utils';
 import KanbanBoard from './KanbanBoard';
 import 'babel-polyfill';
 import 'whatwg-fetch';
+import axios from 'axios';
 
-const API_URL = 'http://kanbanapi.pro-react.com';
+const API_URL = 'http://localhost:8020';
 const API_HEADERS = {
 	'Content-Type': 'application/json',
-	Authorization: 'jickoo-kanban-board'
+	Authorization: 'jickoo-kanban-board',
 };
 
 class KanbanBoardContainer extends Component {
@@ -24,8 +25,8 @@ class KanbanBoardContainer extends Component {
 	}
 
 	componentDidMount() {
-		fetch(API_URL + '/cards', { headers: API_HEADERS })
-			.then((response) => response.json())
+		axios.get(API_URL + '/cards')
+			.then((response) => response.data)
 			.then((responseData) => {
 				this.setState({ cards: responseData });
 
@@ -56,20 +57,20 @@ class KanbanBoardContainer extends Component {
 			, headers: API_HEADERS
 			, body: JSON.stringify(newTask)
 		})
-			.then((response) => {
-				if (response.ok) {
-					return response.json();
-				} else {
-					throw new Error("server response wasn't OK");
-				}
-			})
-			.then((responseData) => {
-				newTask.id = responseData.id;
-				this.setState({ cards: nextState });
-			})
-			.catch((error) => {
-				this.setState(prevState);
-			});
+		.then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				throw new Error("server response wasn't OK");
+			}
+		})
+		.then((responseData) => {
+			newTask.id = responseData.id;
+			this.setState({ cards: nextState });
+		})
+		.catch((error) => {
+			this.setState(prevState);
+		});
 	}
 
 	deleteTask(cardId, taskId, taskIndex) {
@@ -85,19 +86,16 @@ class KanbanBoardContainer extends Component {
 
 		this.setState({ cards: nextState });
 
-		fetch(`${API_URL}/cards/${cardId}/tasks/${taskId}`, {
-			method: 'delete'
-			, headers: API_HEADERS
-		})
-			.then((response) => {
-				if (!response.ok) {
+		axios.delete(`${API_URL}/cards/${cardId}/tasks/${taskId}`,
+			{headers: API_HEADERS}
+		).then((response) => {
+				if (!response.statusText) {
 					throw new Error("Server response wasn't OK");
 				}
-			})
-			.catch((error) => {
-				console.log("fetch error: ", error);
-				this.setState(prevState);
-			});
+		}).catch((error) => {
+			console.log("fetch error: ", error);
+			this.setState(prevState);
+		});
 	}
 
 	toggleTask(cardId, taskId, taskIndex) {
@@ -176,53 +174,56 @@ class KanbanBoardContainer extends Component {
 		fetch(`${API_URL}/cards/${cardId}`, {
 			method: 'put',
 			headers: API_HEADERS,
-			body: JSON.stringify({ status: card.status, row_order_position: cardIndex })
+			body: JSON.stringify({ status: card.status, rowOrderPosition: cardIndex })
 		})
-			.then((response) => {
-				if (!response.ok) {
-					throw new Error("Server response wasn't OK")
-				}
-			})
-			.catch((error) => {
-				console.error("Fetch error:", error);
-				this.setState(
-					update(this.state, {
-						cards: {
-							[cardIndex]: {
-								status: { $set: status }
-							}
+		.then((response) => {
+			if (!response.statusText) {
+				throw new Error("Server response wasn't OK")
+			}
+		})
+		.catch((error) => {
+			console.error("Fetch error:", error);
+			this.setState(
+				update(this.state, {
+					cards: {
+						[cardIndex]: {
+							status: { $set: status }
 						}
-					})
-				);
-			});
+					}
+				})
+			);
+		});
 	}
 
 	addCard(card) {
 		let prevState = this.state;
 
 		if (card.id === null) {
-			let card = Object.assign({}, card, { id: Date.now() });
+			let card = Object.assign({}, card, { id: Date.now() + '' });
 		}
 
 		let nextState = update(this.state.cards, { $push: [card] });
 
 		this.setState({ cards: nextState });
 
-		fetch(`${API_URL}/cards`, {
-			method: 'post'
-			, headers: API_HEADERS
-			, body: JSON.stringify(card)
-		})
-			.then((response) => {
-				if (response.ok) {
-					return response.json();
+		// fetch(`${API_URL}/cards`, {
+		// 	method: 'post'
+		// 	, headers: API_HEADERS
+		// 	, body: JSON.stringify(card)
+		// })
+		axios.post(`${API_URL}/cards`,
+				JSON.stringify(card),
+				{headers: API_HEADERS}
+			).then((response) => {
+				if (response.statusText === "OK") {
+					return response.data;
 				} else {
 					throw new Error("Server response wasn't OK");
 				}
 			})
 			.then((responseData) => {
 				card.id = responseData.id;
-				this.setState({ cards: nextState });
+				this.setState({cards: nextState});
 			})
 			.catch((error) => {
 				this.setState(prevState);
@@ -241,14 +242,14 @@ class KanbanBoardContainer extends Component {
 
 		this.setState({ cards: nextState });
 
-		fetch(`${API_URL}/cards/${card.id}`, {
-			method: 'put'
-			, headers: API_HEADERS
-			, body: JSON.stringify(card)
-		})
-			.then((response) => {
-				if (!response.ok) {
-					throw new Error("Server response wasn't ok");
+		axios.put(`${API_URL}/card/${card.id}`
+			, JSON.stringify(card)
+			, {headers: API_HEADERS}
+			).then((response) => {
+				if (response.statusText === "OK") {
+					// do nothing
+				} else {
+					throw new Error("Server response wasn't OK");
 				}
 			})
 			.catch((e) => {

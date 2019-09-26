@@ -106,7 +106,7 @@ class Card extends Component {
 }
 
 Card.propTypes = {
-	id: PropTypes.number
+	id: PropTypes.string
 	, title: titlePropType
 	, description: PropTypes.string
 	, color: PropTypes.string
