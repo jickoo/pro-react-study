@@ -98,6 +98,7 @@ class KanbanBoardContainer extends Component {
 		});
 	}
 
+	// TODO :: 연동 필요
 	toggleTask(cardId, taskId, taskIndex) {
 		let prevState = this.state;
 
@@ -167,6 +168,7 @@ class KanbanBoardContainer extends Component {
 		}
 	}
 
+	// TODO :: 연동 필요
 	persistCardDrag(cardId, status) {
 		let cardIndex = this.state.cards.findIndex((card) => card.id == cardId);
 		let card = this.state.cards[cardIndex]
